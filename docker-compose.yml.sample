@@ -1,0 +1,27 @@
+name: folio-api
+
+# Copy this to docker-compose.yml and adjust to your environment.
+# Put a reverse proxy (Traefik, nginx, Caddy, …) in front for TLS and routing.
+
+services:
+  folio-api:
+    build: .
+    image: folio-api:latest
+    container_name: folio-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Required: the bearer token clients must present. Set it in a .env file
+      # next to this compose file (FOLIO_TOKEN=...) or in the shell environment.
+      - Folio__Token=${FOLIO_TOKEN:?FOLIO_TOKEN must be set}
+      - Folio__DataDir=/data
+      # If the frontend is served from a DIFFERENT origin than this API, list
+      # its origin(s) so CORS allows it. Not needed for the same-origin mount
+      # below. ASP.NET binds array items via indexed keys:
+      # - Folio__AllowedOrigins__0=https://folio.example.com
+    volumes:
+      # Journals + backups persist here.
+      - ./data:/data
+      # Serve the frontend same-origin. Point this at your copy of folio.html.
+      - ./folio.html:/app/wwwroot/folio.html:ro

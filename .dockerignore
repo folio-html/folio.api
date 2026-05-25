@@ -1,0 +1,13 @@
+bin/
+obj/
+data/
+.git/
+.gitignore
+.vs/
+.dockerignore
+Dockerfile
+docker-compose.yml
+**/.DS_Store
+**/Thumbs.db
+# folio.html is mounted at runtime, not baked into the image.
+wwwroot/folio.html

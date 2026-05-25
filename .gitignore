@@ -1,0 +1,39 @@
+### .NET
+bin/
+obj/
+*.user
+.vs/
+
+### Folio
+# Journal data and its backups are never committed.
+data/
+# folio.html is copied in from the frontend repo at deploy time, not committed here.
+wwwroot/folio.html
+# The real compose file holds deployment-specific config (reverse proxy, hosts,
+# networks); only the sanitized sample is committed.
+docker-compose.yml
+
+### macOS
+.DS_Store
+._*
+Icon
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+### Windows
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+### Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
