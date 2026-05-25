@@ -60,6 +60,24 @@ The sample compose:
 The container runs as the default user so the bind-mounted `/data` stays
 writable; `/health` is available for external monitoring.
 
+### Updating
+
+The API is compiled into the image, so pulling new source is not enough — the
+container keeps the old build until you rebuild it:
+
+```bash
+git pull && docker compose up -d --build
+```
+
+(The mounted `folio.html` is the exception — it is served live off disk, so
+frontend updates apply without a rebuild.) For an auto-deploying server, run the
+above from cron only when there are new commits:
+
+```bash
+git fetch --quiet
+[ "$(git rev-parse @)" != "$(git rev-parse '@{u}')" ] && git pull --quiet && docker compose up -d --build
+```
+
 ## Configuration
 
 Settings live in `appsettings.json` under the `Folio` section. Anything can be
