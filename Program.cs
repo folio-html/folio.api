@@ -68,6 +68,17 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Surface a misconfigured password loudly at startup: an empty Folio:Password
+// makes every login return 401, indistinguishable from a wrong password — the
+// kind of misconfiguration that's painful to diagnose from the client side.
+var configuredPassword = app.Configuration["Folio:Password"];
+if (string.IsNullOrEmpty(configuredPassword))
+    app.Logger.LogWarning(
+        "Folio:Password is not set — every login will return 401. Set Folio__Password (e.g. FOLIO_PASSWORD in the compose .env).");
+else if (configuredPassword == "change-me")
+    app.Logger.LogWarning(
+        "Folio:Password is still the default 'change-me' — set a real Folio__Password before exposing this API.");
+
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
