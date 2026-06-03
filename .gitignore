@@ -5,12 +5,12 @@ obj/
 .vs/
 
 ### Secrets
-# The bearer token lives here in deployment — never commit it.
+# The login password lives here in deployment — never commit it.
 .env
 .env.*
 
 ### Folio
-# Journal data and its backups are never committed.
+# Journal data, its backups, and the session-cookie keys (data/.keys) are never committed.
 data/
 # folio.html is copied in from the frontend repo at deploy time, not committed here.
 wwwroot/folio.html

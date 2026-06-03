@@ -44,7 +44,7 @@ the sample, drop your `folio.html` next to it, and bring it up:
 ```bash
 cp docker-compose.yml.sample docker-compose.yml
 cp ../folio.html/public/folio.html ./folio.html
-echo "FOLIO_TOKEN=$(openssl rand -hex 32)" > .env   # token is required
+echo "FOLIO_PASSWORD=$(openssl rand -hex 32)" > .env   # a password is required
 docker compose up -d --build
 ```
 
@@ -82,24 +82,43 @@ git fetch --quiet
 
 Settings live in `appsettings.json` under the `Folio` section. Anything can be
 overridden by environment variables using the `Folio__Key` convention — keep the
-token out of the file in real deployments.
+password out of the file in real deployments.
 
 | Key | Env var | Default | Meaning |
 |-----|---------|---------|---------|
-| `Token` | `Folio__Token` | `change-me` | Static bearer token required on every API call |
+| `Password` | `Folio__Password` | `change-me` | Login password exchanged for a session cookie |
 | `DataDir` | `Folio__DataDir` | `data` | Directory holding the `.md` journals |
 | `Backups` | `Folio__Backups` | `true` | Copy the previous version into `data/.backups/` before each write/delete |
 | `AllowedOrigins` | — | `[]` | CORS origins; leave empty for same-origin (bundled) deployments |
 
 ## Authentication
 
-Every `/v1` request must send the token:
+Auth is a single shared password exchanged for an encrypted, HttpOnly **session
+cookie**. Log in once, then send the cookie on every `/v1/journals` request:
 
-```
-Authorization: Bearer <token>
+| Method | Path | Body | Notes |
+|--------|------|------|-------|
+| `POST` | `/v1/auth/login` | `{ "password": "…" }` | Sets the session cookie on success; `401` on a wrong password. |
+| `POST` | `/v1/auth/logout` | — | Clears the cookie. |
+| `GET` | `/v1/auth/session` | — | `204` if the cookie is valid, else `401`. |
+
+```bash
+# Log in (store the cookie), then list journals with it.
+curl -c cookies.txt -X POST http://localhost:5080/v1/auth/login \
+  -H 'Content-Type: application/json' -d '{"password":"change-me"}'
+curl -b cookies.txt http://localhost:5080/v1/journals
 ```
 
-Missing or wrong token → `401`. The comparison is constant-time.
+A missing or expired cookie on a `/v1/journals` request → `401`. The password is
+compared in constant time. The cookie is signed/encrypted with Data Protection
+keys persisted under `data/.keys`, so sessions survive restarts and redeploys.
+
+**Same-origin vs cross-origin.** The cookie is `SameSite=Lax` for the bundled,
+same-origin deployment (works over plain HTTP, including local dev). When
+`AllowedOrigins` is set, the frontend is cross-origin, so the cookie switches to
+`SameSite=None` — which browsers only accept when also `Secure`. **Cross-origin
+therefore requires HTTPS on both ends.** For local development prefer serving
+`folio.html` same-origin from `wwwroot/`.
 
 ## API
 

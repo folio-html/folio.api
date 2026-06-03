@@ -12,9 +12,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Required: the bearer token clients must present. Set it in a .env file
-      # next to this compose file (FOLIO_TOKEN=...) or in the shell environment.
-      - Folio__Token=${FOLIO_TOKEN:?FOLIO_TOKEN must be set}
+      # Required: the login password clients exchange for a session cookie. Set it
+      # in a .env file next to this compose file (FOLIO_PASSWORD=...) or in the
+      # shell environment.
+      - Folio__Password=${FOLIO_PASSWORD:?FOLIO_PASSWORD must be set}
       - Folio__DataDir=/data
       # If the frontend is served from a DIFFERENT origin than this API, list
       # its origin(s) so CORS allows it. Not needed for the same-origin mount
