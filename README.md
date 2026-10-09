@@ -1,6 +1,6 @@
 # folio.api
 
-A tiny, self-hostable backend for [_folio.html_](https://github.com/DanielGilbert/folio).
+A tiny, self-hostable backend for [_folio.html_](https://github.com/folio-html/folio.html).
 
 It puts an API between the journal frontend and the markdown file on disk:
 
@@ -33,17 +33,17 @@ as the API. _folio.html_ auto-detects its endpoint from `location.origin`, so no
 client configuration is needed for the bundled case.
 
 ```bash
-cp ../folio/public/folio.html wwwroot/folio.html
+cp ../folio.html/public/folio.html wwwroot/folio.html
 ```
 
 ## Docker
 
-A multi-stage `Dockerfile` and a `docker-compose.yml.sample` are included. Copy
-the sample, drop your `folio.html` next to it, and bring it up:
+A multi-stage `Dockerfile` and a `docker-compose.yml.sample` are included. The
+sample expects a clone of _folio.html_ next to this repo (`../folio.html`).
+Copy the sample and bring it up:
 
 ```bash
 cp docker-compose.yml.sample docker-compose.yml
-cp ../folio.html/public/folio.html ./folio.html
 echo "FOLIO_PASSWORD=$(openssl rand -hex 32)" > .env   # a password is required
 docker compose up -d --build
 ```
@@ -51,8 +51,10 @@ docker compose up -d --build
 The sample compose:
 
 - persists journals + backups to `./data` (mounted at `/data`);
-- mounts `folio.html` into `/app/wwwroot/folio.html` so the frontend is served
-  same-origin (no CORS needed);
+- mounts the frontend's `../folio.html/public` directory as `/app/wwwroot` so
+  the frontend is served same-origin (no CORS needed). Mount the directory, not
+  the single file: a file bind mount pins the old inode, so after a `git pull`
+  the container would keep serving the stale copy;
 - publishes port `8080`. Put a reverse proxy (Traefik, nginx, Caddy, …) in front
   for TLS and routing — that part is deployment-specific and left out of the
   sample.
@@ -69,8 +71,8 @@ container keeps the old build until you rebuild it:
 git pull && docker compose up -d --build
 ```
 
-(The mounted `folio.html` is the exception — it is served live off disk, so
-frontend updates apply without a rebuild.) For an auto-deploying server, run the
+(The mounted frontend is the exception — it is served live off disk, so a
+`git pull` in the _folio.html_ clone applies without a rebuild.) For an auto-deploying server, run the
 above from cron only when there are new commits:
 
 ```bash

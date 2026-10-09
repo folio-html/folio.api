@@ -24,5 +24,7 @@ services:
     volumes:
       # Journals + backups persist here.
       - ./data:/data
-      # Serve the frontend same-origin. Point this at your copy of folio.html.
-      - ./folio.html:/app/wwwroot/folio.html:ro
+      # Serve the frontend same-origin from a sibling clone of folio.html. Mount
+      # the DIRECTORY, not the file: a single-file bind mount pins the old inode,
+      # so a `git pull` there would keep serving stale content until a restart.
+      - ../folio.html/public:/app/wwwroot:ro

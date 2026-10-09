@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING:** Replaced static bearer-token auth with a password login that issues an encrypted, HttpOnly session cookie. Clients now `POST /v1/auth/login` with `{ "password": "…" }`, then send the cookie on `/v1/journals` requests; `/v1/auth/logout` and `/v1/auth/session` round out the new auth surface. The `Folio:Token` / `Folio__Token` setting is renamed to `Folio:Password` / `Folio__Password` (compose env: `FOLIO_PASSWORD`). The password is still compared in constant time. Session-cookie keys are persisted under `data/.keys` so sessions survive restarts and redeploys. Cross-origin frontends (when `AllowedOrigins` is set) now require HTTPS, since the cookie becomes `SameSite=None; Secure`.
+- `docker-compose.yml.sample` now mounts a sibling _folio.html_ clone's `public/` directory as `wwwroot` instead of a single copied `folio.html` file. A single-file bind mount pins the file's inode, so after a `git pull` the container kept serving the stale frontend until it was recreated.
 
 ## [0.1.0] - 2026-05-25
 
